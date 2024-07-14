@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feedback Report</h1>
+    <div>
+        <h2>Percentage of Positive Feedbacks</h2>
+        <p id="positive-percentage"></p>
+    </div>
+    <div>
+        <h2>Most Requested Features</h2>
+        <table id="features-table">
+            <thead>
+                <tr>
+                    <th>Occurrences</th>
+                    <th>Code</th>
+                    <th>Reasons</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Content will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <h2>Feedbacks</h2>
+        <table id="feedbacks-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Feedback User</th>
+                    <th>Sentiment</th>
+                    <th>Requested Features</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Content will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/feedbacks/relatorio')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('positive-percentage').textContent = data.percentage_positive_feedbacks;
+
+                    const featuresTableBody = document.getElementById('features-table').querySelector('tbody');
+                    data.most_requested_features.forEach(feature => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${feature.ocurrences}</td>
+                            <td>${feature.code}</td>
+                            <td>${feature.reasons.map(r => r.reason).join('<br>')}</td>
+                        `;
+                        featuresTableBody.appendChild(row);
+                    });
+
+                    const feedbacksTableBody = document.getElementById('feedbacks-table').querySelector('tbody');
+                    data.feedbacks.forEach(feedback => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${feedback.id}</td>
+                            <td>${feedback.feedback_user}</td>
+                            <td>${feedback.sentiment}</td>
+                            <td>${feedback.requested_features.map(f => f.code + ': ' + f.reason).join('<br>')}</td>
+                        `;
+                        feedbacksTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+    </script>
+</body>
+</html>

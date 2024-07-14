@@ -1,6 +1,8 @@
 from collections import Counter
 from functools import wraps
+from typing import Any
 
+from app.main.feedback.feedback_auxiliar_functions import FeedbackFunctions
 from app.main.feedback.feedback_model import Feedback, FeedbackClassified
 from app.main.openai.openai_service import FeedbackAnalyzer, OpenAiService
 from database import SessionLocal
@@ -69,37 +71,19 @@ class FeedbackService:
 
     @staticmethod
     @session_scope
-    def generate_feedbacks_report(session):
+    def generate_feedbacks_report(session) -> dict[str, str | list[dict[str, Any]] | Any]:
         try:
             feedbacks = session.query(Feedback).all()
 
             # Calcular a porcentagem de feedbacks positivos
-            total_feedbacks = len(feedbacks)
-            positive_feedbacks = sum(
-                1
-                for feedback in feedbacks
-                if any(
-                    feature.sentiment.upper() == "POSITIVO"
-                    for feature in feedback.feedback_classifieds
-                )
-            )
+            feedback_functions = FeedbackFunctions()
             percentage_positive_feedbacks = (
-                (positive_feedbacks / total_feedbacks) * 100 if total_feedbacks > 0 else 0
+                feedback_functions.calculate_percentage_positive_feedbacks(feedbacks)
             )
 
             # Encontrar as features mais pedidas com base no código que foi adicionado ao classificar o feedback
             features = session.query(FeedbackClassified).all()
-            feature_counter = Counter(feature.code for feature in features)
-            feature_reasons = {}
-            for feature in features:
-                if feature.code not in feature_reasons:
-                    feature_reasons[feature.code] = []
-                feature_reasons[feature.code].append({"reason": feature.reason})
-
-            most_requested_features = [
-                {"ocurrences": count, "code": code, "reasons": feature_reasons[code]}
-                for code, count in feature_counter.most_common()
-            ]
+            most_requested_features = feedback_functions.find_most_requested_features(features)
 
             response = {
                 "percentage_positive_feedbacks": f"{percentage_positive_feedbacks:.2f}%",
