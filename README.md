@@ -148,9 +148,3 @@ http://localhost:5500/test-email-job
 ├── requirements.txt
 └── README.md
 ```
-
-## Contribuindo
-Contribuições são bem-vindas! Sinta-se à vontade para abrir uma issue ou enviar um pull request.
-
-## Licença
-Este projeto está licenciado sob a MIT License.
