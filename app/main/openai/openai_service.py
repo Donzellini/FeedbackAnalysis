@@ -51,6 +51,23 @@ class OpenAiService:
         )
         return response.choices[0].message.content.strip()
 
+    @staticmethod
+    def generate_email_body_with_llm(percentage_positive, percentage_negative, features_info):
+
+        prompt = f"""
+        Você é um assistente de comunicação. Escreva um e-mail semanal sobre feedbacks com as seguintes informações:
+
+        Porcentagem de Feedbacks Positivos: {percentage_positive}
+        Porcentagem de Feedbacks Negativos: {percentage_negative}
+        Principais Funcionalidades Pedidas: {features_info}
+        """
+
+        generated_text = client.chat.completions.create(
+            model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}]
+        )
+
+        return generated_text.choices[0].message.content
+
 
 class FeedbackAnalyzer:
     @staticmethod

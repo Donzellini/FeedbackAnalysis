@@ -71,9 +71,16 @@ class FeedbackService:
 
     @staticmethod
     @session_scope
-    def generate_feedbacks_report(session) -> dict[str, str | list[dict[str, Any]] | Any]:
+    def generate_feedbacks_report(
+        session, start_date=None
+    ) -> dict[str, str | list[dict[str, Any]] | Any]:
         try:
-            feedbacks = session.query(Feedback).all()
+            query = session.query(Feedback)
+
+            if start_date:
+                query = query.filter(Feedback.created_at >= start_date)
+
+            feedbacks = query.all()
 
             # Calcular a porcentagem de feedbacks positivos
             feedback_functions = FeedbackFunctions()

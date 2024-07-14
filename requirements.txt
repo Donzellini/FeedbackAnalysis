@@ -1,0 +1,21 @@
+# Manipulacao de Dados
+alembic==1.13.2
+psycopg2==2.9.9
+SQLAlchemy==2.0.31
+pydantic==2.8.2
+
+# Flask
+Flask==3.0.3
+flask-restx==1.3.0
+
+# Open AI
+openai==1.35.13
+
+# Scheduler
+APScheduler==3.10.4
+
+# Renderizacao de templates
+Jinja2==3.1.4
+
+#Formatacao do projeto
+pre-commit==3.7.1

@@ -22,7 +22,7 @@ Este projeto implementa uma API para análise qualitativa e quantitativa de feed
 
 ### Pré-requisitos
 
-- Python 3.8+
+- Python 3.11+
 - PostgreSQL
 
 ### Instalação
@@ -68,9 +68,9 @@ MAIL_DEFAULT_SENDER = seu_email@exemplo.com
 OPENAI_API_KEY = sua_chave_openai
 ```
 
-Execução do Projeto
+## Execução do Projeto
 
-Configuração do Banco de Dados
+### Configuração do Banco de Dados
 Execute as migrações para criar as tabelas no banco de dados:
 
 ```bash
@@ -86,7 +86,7 @@ python run.py
 
 A API estará acessível em http://localhost:5500.
 
-Testando o Envio de E-mails
+### Testando o Envio de E-mails
 
 Para testar a rotina de envio de e-mails, acesse a rota /test-job-email:
 
@@ -94,15 +94,15 @@ Para testar a rotina de envio de e-mails, acesse a rota /test-job-email:
 http://localhost:5500/test-email
 ```
 
-Uso da API
+## Uso da API
 
-Endpoints Disponíveis
+### Endpoints Disponíveis
 
 POST /api/feedbacks: Adiciona um novo feedback e realiza a classificação.
 GET /api/feedbacks/relatorio: Gera um relatório com a porcentagem de feedbacks positivos e negativos, e funcionalidades mais pedidas.
 
-Exemplo de Request e Response
-Adicionar Feedback
+### Exemplo de Request e Response
+#### Adicionar Feedback
 
 ```bash
 curl -X POST http://localhost:5500/api/feedbacks \
@@ -110,14 +110,15 @@ curl -X POST http://localhost:5500/api/feedbacks \
     -d '{"id": "unique-id", "feedback": "Ótimo serviço!"}'
 ```
 
-Gerar Relatório
+#### Gerar Relatório
 
 ```bash
 curl -X GET http://localhost:5500/api/feedbacks/relatorio
 ```
 
-Estrutura do Projeto
+## Estrutura do Projeto
 
+```shell
 .
 ├── app
 │   ├── __init__.py
@@ -134,9 +135,10 @@ Estrutura do Projeto
 ├── config.ini
 ├── requirements.txt
 └── README.md
+```
 
-Contribuindo
+## Contribuindo
 Contribuições são bem-vindas! Sinta-se à vontade para abrir uma issue ou enviar um pull request.
 
-Licença
+## Licença
 Este projeto está licenciado sob a MIT License.
