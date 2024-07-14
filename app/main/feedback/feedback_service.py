@@ -72,7 +72,6 @@ class FeedbackService:
     def generate_feedbacks_report(session):
         try:
             feedbacks = session.query(Feedback).all()
-            # feedback_dicts = [feedback.to_dict() for feedback in feedbacks]
 
             # Calcular a porcentagem de feedbacks positivos
             total_feedbacks = len(feedbacks)
@@ -88,15 +87,20 @@ class FeedbackService:
                 (positive_feedbacks / total_feedbacks) * 100 if total_feedbacks > 0 else 0
             )
 
-            # Encontrar as features mais pedidas
+            # Encontrar as features mais pedidas com base no código que foi adicionado ao classificar o feedback
             features = session.query(FeedbackClassified).all()
-            feature_counter = Counter((feature.code, feature.reason) for feature in features)
+            feature_counter = Counter(feature.code for feature in features)
+            feature_reasons = {}
+            for feature in features:
+                if feature.code not in feature_reasons:
+                    feature_reasons[feature.code] = []
+                feature_reasons[feature.code].append({"reason": feature.reason})
+
             most_requested_features = [
-                {"ocurrences": count, "code": code, "reason": reason}
-                for (code, reason), count in feature_counter.most_common()
+                {"ocurrences": count, "code": code, "reasons": feature_reasons[code]}
+                for code, count in feature_counter.most_common()
             ]
 
-            # Construir a resposta
             response = {
                 "percentage_positive_feedbacks": f"{percentage_positive_feedbacks:.2f}%",
                 "most_requested_features": most_requested_features,
@@ -107,8 +111,9 @@ class FeedbackService:
             for feedback in feedbacks:
                 classified_features = [
                     {"code": feature.code, "reason": feature.reason}
-                    for feature in features
-                    if feature.id_feedback == feedback.id
+                    for feature in session.query(FeedbackClassified)
+                    .filter_by(id_feedback=feedback.id)
+                    .all()
                 ]
                 response["feedbacks"].append(
                     {
