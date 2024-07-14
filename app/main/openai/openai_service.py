@@ -8,7 +8,7 @@ from config import OPENAI_KEY
 client = OpenAI(api_key=OPENAI_KEY)
 
 
-class OpenAi:
+class OpenAiService:
 
     @staticmethod
     def analyze_feedback(feedback):
@@ -91,7 +91,7 @@ class FeedbackAnalyzer:
 
     @staticmethod
     def generate_code(reason):
-        suggested_code = OpenAi.generate_code_for_improvement(reason)
+        suggested_code = OpenAiService.generate_code_for_improvement(reason)
 
         match = re.search(r"Palavras Significativas:\s*\[(\w+),\s*(\w+)]", suggested_code)
         if match:

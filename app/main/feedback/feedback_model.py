@@ -2,6 +2,7 @@ import uuid
 
 from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID as SQLAlchemyUUID
+from sqlalchemy.orm import relationship
 
 from database import Base
 
@@ -25,11 +26,15 @@ class BaseFeedback(Base):
         onupdate=get_current_user,
     )
 
+    def to_dict(self):
+        return {column.name: str(getattr(self, column.name)) for column in self.__table__.columns}
+
 
 class Feedback(BaseFeedback):
     __tablename__ = "tb_feedbacks"
 
     feedback = Column(Text, nullable=False)
+    feedback_classifieds = relationship("FeedbackClassified", backref="feedback")
 
 
 class FeedbackClassified(BaseFeedback):

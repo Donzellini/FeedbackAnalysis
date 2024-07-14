@@ -1,7 +1,8 @@
+from collections import Counter
 from functools import wraps
 
 from app.main.feedback.feedback_model import Feedback, FeedbackClassified
-from app.main.openai.openai_service import FeedbackAnalyzer, OpenAi
+from app.main.openai.openai_service import FeedbackAnalyzer, OpenAiService
 from database import SessionLocal
 
 
@@ -22,16 +23,16 @@ def session_scope(func):
     return wrapper
 
 
-class FeedbackDb:
+class FeedbackService:
 
     @staticmethod
     @session_scope
-    def insere_registros_uhul(session, feedback, parsed_analysis):
+    def insert_registers(session, register, parsed_analysis):
         requested_features = []
 
         for feature in parsed_analysis["requested_features"]:
             feedback_classificado = FeedbackClassified(
-                id_feedback=feedback.id,
+                id_feedback=register.id,
                 sentiment=parsed_analysis["sentiment"],
                 code=feature["code"],
                 reason=feature["reason"],
@@ -40,14 +41,14 @@ class FeedbackDb:
             requested_features.append({"code": feature["code"], "reason": feature["reason"]})
 
         return {
-            "id": str(feedback.guid),
+            "id": str(register.guid),
             "sentiment": parsed_analysis["sentiment"].upper(),
             "requested_features": requested_features,
         }
 
     @staticmethod
     @session_scope
-    def adicionar_feedback(session, item):
+    def add_feedback_analysis(session, item):
         feedback = Feedback(
             guid=item["id"],
             feedback=item["feedback"],
@@ -57,20 +58,71 @@ class FeedbackDb:
         session.refresh(feedback)
 
         # Analisar o feedback usando OpenAI
-        service_open_ai = OpenAi()
+        service_open_ai = OpenAiService()
         analise_feedback = service_open_ai.analyze_feedback(feedback.feedback)
         parsed_analysis = FeedbackAnalyzer.parse_analysis(analise_feedback)
 
         # Adicionar registros na tabela tb_feedbacks_classificados
-        feedbacks_classifieds = FeedbackDb.insere_registros_uhul(feedback, parsed_analysis)
+        feedbacks_classifieds = FeedbackService.insert_registers(feedback, parsed_analysis)
 
         return feedbacks_classifieds
 
     @staticmethod
     @session_scope
-    def obter(session, id=None):
-        if id:
-            feedback = session.query(Feedback).filter_by(id=id).first()
-            return feedback
-        feedbacks = session.query(Feedback).all()
-        return feedbacks
+    def generate_feedbacks_report(session):
+        try:
+            feedbacks = session.query(Feedback).all()
+            # feedback_dicts = [feedback.to_dict() for feedback in feedbacks]
+
+            # Calcular a porcentagem de feedbacks positivos
+            total_feedbacks = len(feedbacks)
+            positive_feedbacks = sum(
+                1
+                for feedback in feedbacks
+                if any(
+                    feature.sentiment.upper() == "POSITIVO"
+                    for feature in feedback.feedback_classifieds
+                )
+            )
+            percentage_positive_feedbacks = (
+                (positive_feedbacks / total_feedbacks) * 100 if total_feedbacks > 0 else 0
+            )
+
+            # Encontrar as features mais pedidas
+            features = session.query(FeedbackClassified).all()
+            feature_counter = Counter((feature.code, feature.reason) for feature in features)
+            most_requested_features = [
+                {"ocurrences": count, "code": code, "reason": reason}
+                for (code, reason), count in feature_counter.most_common()
+            ]
+
+            # Construir a resposta
+            response = {
+                "percentage_positive_feedbacks": f"{percentage_positive_feedbacks:.2f}%",
+                "most_requested_features": most_requested_features,
+                "feedbacks": [],
+            }
+
+            # Adicionar feedbacks com suas requested_features
+            for feedback in feedbacks:
+                classified_features = [
+                    {"code": feature.code, "reason": feature.reason}
+                    for feature in features
+                    if feature.id_feedback == feedback.id
+                ]
+                response["feedbacks"].append(
+                    {
+                        "id": str(feedback.guid),
+                        "feedback_user": feedback.feedback,
+                        "sentiment": (
+                            feedback.feedback_classifieds[0].sentiment.upper()
+                            if feedback.feedback_classifieds
+                            else ""
+                        ),
+                        "requested_features": classified_features,
+                    }
+                )
+
+            return response
+        finally:
+            session.close()
