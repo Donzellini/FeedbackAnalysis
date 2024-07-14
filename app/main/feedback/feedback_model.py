@@ -16,9 +16,7 @@ class BaseFeedback(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False)
     guid = Column(SQLAlchemyUUID(as_uuid=True), nullable=False, default=uuid.uuid4)
     created_at = Column(DateTime, nullable=True, default=func.now())
-    updated_at = Column(
-        DateTime, nullable=True, default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime, nullable=True, default=func.now(), onupdate=func.now())
     created_by = Column(String(length=100), nullable=True, default=get_current_user)
     updated_by = Column(
         String(length=100),

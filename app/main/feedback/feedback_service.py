@@ -37,9 +37,7 @@ class FeedbackDb:
                 reason=feature["reason"],
             )
             session.add(feedback_classificado)
-            requested_features.append(
-                {"code": feature["code"], "reason": feature["reason"]}
-            )
+            requested_features.append({"code": feature["code"], "reason": feature["reason"]})
 
         return {
             "id": str(feedback.guid),
@@ -64,9 +62,7 @@ class FeedbackDb:
         parsed_analysis = FeedbackAnalyzer.parse_analysis(analise_feedback)
 
         # Adicionar registros na tabela tb_feedbacks_classificados
-        feedbacks_classifieds = FeedbackDb.insere_registros_uhul(
-            feedback, parsed_analysis
-        )
+        feedbacks_classifieds = FeedbackDb.insere_registros_uhul(feedback, parsed_analysis)
 
         return feedbacks_classifieds
 

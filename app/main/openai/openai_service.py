@@ -93,9 +93,7 @@ class FeedbackAnalyzer:
     def generate_code(reason):
         suggested_code = OpenAi.generate_code_for_improvement(reason)
 
-        match = re.search(
-            r"Palavras Significativas:\s*\[(\w+),\s*(\w+)]", suggested_code
-        )
+        match = re.search(r"Palavras Significativas:\s*\[(\w+),\s*(\w+)]", suggested_code)
         if match:
             word1 = unidecode(re.sub(r"\W+", "", match.group(1))).upper()
             word2 = unidecode(re.sub(r"\W+", "", match.group(2))).upper()

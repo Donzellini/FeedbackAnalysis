@@ -5,9 +5,7 @@ from app.main.feedback.feedback_service import FeedbackDb
 
 api = Namespace("Feedback", description="")
 
-feedback_model = api.model(
-    "FeedbackModel", {"id": fields.String, "feedback": fields.String}
-)
+feedback_model = api.model("FeedbackModel", {"id": fields.String, "feedback": fields.String})
 
 requested_feature_model = api.model(
     "RequestedFeature", {"code": fields.String, "reason": fields.String}
